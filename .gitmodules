@@ -1,0 +1,9 @@
+[submodule "src/rmf_demos"]
+	path = src/rmf_demos
+	url = https://github.com/ajayiyer22/rmf_demos.git
+	branch = hotel-exploration
+[submodule "src/clearpath_simulator"]
+	path = src/clearpath_simulator
+	url = https://github.com/ajayiyer22/clearpath_simulator.git
+	branch = hotel-simulation
+	shallow = true

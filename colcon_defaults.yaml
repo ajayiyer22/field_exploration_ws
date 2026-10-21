@@ -1,0 +1,8 @@
+# Build with the field_robotics Conda interpreter (Python 3.12), as in the
+# field_robotics workspace, so Python nodes and generated message bindings run
+# under `conda activate field_robotics`. Read automatically by colcon when it is
+# run from this directory. This CMake option affects CMake packages only;
+# use the activated environment's `python -m colcon build` for Python packages.
+build:
+  cmake-args:
+    - -DPython3_EXECUTABLE=/home/ajayiyer/miniconda3/envs/field_robotics/bin/python3

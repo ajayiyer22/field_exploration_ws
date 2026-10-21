@@ -1,0 +1,92 @@
+diff --git a/clearpath_generator_gz/clearpath_generator_gz/launch/generator.py b/clearpath_generator_gz/clearpath_generator_gz/launch/generator.py
+index 054afa6..dbb56ab 100644
+--- a/clearpath_generator_gz/clearpath_generator_gz/launch/generator.py
++++ b/clearpath_generator_gz/clearpath_generator_gz/launch/generator.py
+@@ -44,9 +44,9 @@ from clearpath_generator_gz.launch.sensors import SensorLaunch
+ 
+ 
+ class GzLaunchGenerator(LaunchGenerator):
+-    GZ_TO_ROS_TWIST = '@geometry_msgs/msg/Twist[ignition.msgs.Twist'
+-    ROS_TO_GZ_TWIST = '@geometry_msgs/msg/Twist]ignition.msgs.Twist'
+-    GZ_TO_ROS_TF = '@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V'
++    GZ_TO_ROS_TWIST = '@geometry_msgs/msg/TwistStamped[gz.msgs.Twist'
++    ROS_TO_GZ_TWIST = '@geometry_msgs/msg/TwistStamped]gz.msgs.Twist'
++    GZ_TO_ROS_TF = '@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V'
+ 
+     def __init__(self, setup_path: str = '/etc/clearpath/') -> None:
+         super().__init__(setup_path)
+@@ -73,7 +73,7 @@ class GzLaunchGenerator(LaunchGenerator):
+         cmd_vel_robot_bridge_arg = '/model/' + self.robot_name + '/cmd_vel' + self.ROS_TO_GZ_TWIST
+         cmd_vel_robot_bridge_remap = (
+             '/model/' + self.robot_name + '/cmd_vel',
+-            'platform/cmd_vel_unstamped'
++            'platform/cmd_vel'
+           )
+ 
+         self.cmd_vel_node = LaunchFile.Node(
+diff --git a/clearpath_generator_gz/clearpath_generator_gz/launch/sensors.py b/clearpath_generator_gz/clearpath_generator_gz/launch/sensors.py
+index 3663b57..99faf1d 100644
+--- a/clearpath_generator_gz/clearpath_generator_gz/launch/sensors.py
++++ b/clearpath_generator_gz/clearpath_generator_gz/launch/sensors.py
+@@ -48,12 +48,12 @@ class SensorLaunch():
+     NAMESPACE = 'namespace'
+ 
+     # gz to ros bridge parameters
+-    GZ_TO_ROS_LASERSCAN = '@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan'
+-    GZ_TO_ROS_POINTCLOUD = '@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked'
+-    GZ_TO_ROS_IMAGE = '@sensor_msgs/msg/Image[ignition.msgs.Image'
+-    GZ_TO_ROS_CAMERA_INFO = '@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo'
+-    GZ_TO_ROS_IMU = '@sensor_msgs/msg/Imu[ignition.msgs.IMU'
+-    GZ_TO_ROS_NAVSAT = '@sensor_msgs/msg/NavSatFix[ignition.msgs.NavSat'
++    GZ_TO_ROS_LASERSCAN = '@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
++    GZ_TO_ROS_POINTCLOUD = '@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'
++    GZ_TO_ROS_IMAGE = '@sensor_msgs/msg/Image[gz.msgs.Image'
++    GZ_TO_ROS_CAMERA_INFO = '@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo'
++    GZ_TO_ROS_IMU = '@sensor_msgs/msg/Imu[gz.msgs.IMU'
++    GZ_TO_ROS_NAVSAT = '@sensor_msgs/msg/NavSatFix[gz.msgs.NavSat'
+ 
+     RGBD_CAMERAS = [
+         IntelRealsense.SENSOR_MODEL,
+diff --git a/clearpath_gz/launch/robot_spawn.launch.py b/clearpath_gz/launch/robot_spawn.launch.py
+index dfac91c..29c336d 100644
+--- a/clearpath_gz/launch/robot_spawn.launch.py
++++ b/clearpath_gz/launch/robot_spawn.launch.py
+@@ -41,6 +41,9 @@ from launch_ros.substitutions import FindPackageShare
+ 
+ 
+ ARGUMENTS = [
++    DeclareLaunchArgument('frame_prefix_relay', default_value='true',
++                          choices=['true', 'false'],
++                          description='Publish a shared prefixed TF tree; disable for per-robot TF.'),
+     DeclareLaunchArgument('rviz', default_value='false',
+                           choices=['true', 'false'],
+                           description='Start rviz.'),
+@@ -141,6 +144,7 @@ def launch_setup(context, *args, **kwargs):
+                     src=f'/{namespace}/sensors/{sensor_name}/scan',
+                     dst=f'/{namespace}/sensors/{sensor_name}/scan_raw')
+                 for sensor_name in lidar2d_names
++                if LaunchConfiguration('frame_prefix_relay').perform(context) == 'true'
+             ],
+             IncludeLaunchDescription(
+                 PythonLaunchDescriptionSource([launch_file_sensors_service]),
+@@ -192,6 +196,7 @@ def launch_setup(context, *args, **kwargs):
+             package='clearpath_gz',
+             executable='frame_prefix_relay',
+             name='frame_prefix_relay',
++            condition=IfCondition(LaunchConfiguration('frame_prefix_relay')),
+             namespace=namespace,
+             parameters=[{
+                 'frame_prefix': namespace,
+diff --git a/clearpath_gz/package.xml b/clearpath_gz/package.xml
+index d4a7c90..db773af 100644
+--- a/clearpath_gz/package.xml
++++ b/clearpath_gz/package.xml
+@@ -23,7 +23,7 @@
+   <exec_depend>controller_manager_msgs</exec_depend>
+   <exec_depend>frontier_exploration_ros2</exec_depend>
+   <exec_depend>geometry_msgs</exec_depend>
+-  <exec_depend>ign_ros2_control</exec_depend>
++  <exec_depend>gz_ros2_control</exec_depend>
+   <exec_depend>lifecycle_msgs</exec_depend>
+   <exec_depend>nav_msgs</exec_depend>
+   <exec_depend>nav2_msgs</exec_depend>

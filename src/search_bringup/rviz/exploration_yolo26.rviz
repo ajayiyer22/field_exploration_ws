@@ -1,0 +1,334 @@
+Panels:
+- Class: rviz_common/Displays
+  Name: Displays
+  Property Tree Widget:
+    Expanded:
+    - /Husky costmaps1
+    - /Jackal 1 costmaps1
+    - /Jackal 2 costmaps1
+    Splitter Ratio: 0.6
+  Tree Height: 280
+  Help Height: 0
+- Class: rviz_common/Views
+  Name: Views
+Visualization Manager:
+  Class: ''
+  Displays:
+  - Class: rviz_default_plugins/Grid
+    Name: Grid
+    Enabled: true
+    Cell Size: 1
+    Plane Cell Count: 60
+    Color: 160; 160; 164
+    Alpha: 0.3
+    Offset:
+      X: 19.3
+      Y: -23.5
+      Z: 0
+    Reference Frame: <Fixed Frame>
+    Value: true
+  - Class: rviz_default_plugins/Map
+    Name: Exploration map
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /exploration_map/occupancy
+    Color Scheme: map
+    Alpha: 0.9
+    Draw Behind: true
+    Value: true
+  - Class: rviz_common/Group
+    Name: Husky costmaps
+    Enabled: true
+    Displays:
+    - Class: rviz_default_plugins/Map
+      Name: Global planner costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /a200_0000/global_costmap/costmap
+      Color Scheme: costmap
+      Alpha: 0.65
+      Draw Behind: false
+      Value: true
+    - Class: rviz_default_plugins/Map
+      Name: Local MPPI costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /a200_0000/local_costmap/rviz_costmap
+      Color Scheme: costmap
+      Alpha: 0.85
+      Draw Behind: false
+      Value: true
+  - Class: rviz_common/Group
+    Name: Jackal 1 costmaps
+    Enabled: false
+    Displays:
+    - Class: rviz_default_plugins/Map
+      Name: Global planner costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /j100_0000/global_costmap/costmap
+      Color Scheme: costmap
+      Alpha: 0.65
+      Draw Behind: false
+      Value: true
+    - Class: rviz_default_plugins/Map
+      Name: Local MPPI costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /j100_0000/local_costmap/rviz_costmap
+      Color Scheme: costmap
+      Alpha: 0.85
+      Draw Behind: false
+      Value: true
+  - Class: rviz_common/Group
+    Name: Jackal 2 costmaps
+    Enabled: false
+    Displays:
+    - Class: rviz_default_plugins/Map
+      Name: Global planner costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /j100_0001/global_costmap/costmap
+      Color Scheme: costmap
+      Alpha: 0.65
+      Draw Behind: false
+      Value: true
+    - Class: rviz_default_plugins/Map
+      Name: Local MPPI costmap
+      Enabled: true
+      Topic:
+        Depth: 1
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /j100_0001/local_costmap/rviz_costmap
+      Color Scheme: costmap
+      Alpha: 0.85
+      Draw Behind: false
+      Value: true
+  - Class: rviz_default_plugins/Image
+    Name: Husky RGB + YOLO26
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /a200_0000/yolo26/annotated_image
+    Transport Hint: raw
+    Normalize Range: true
+    Min Value: 0
+    Max Value: 1
+    Median window: 5
+    Value: true
+  - Class: rviz_default_plugins/Image
+    Name: Jackal 1 RGB + YOLO26
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /j100_0000/yolo26/annotated_image
+    Transport Hint: raw
+    Normalize Range: true
+    Min Value: 0
+    Max Value: 1
+    Median window: 5
+    Value: true
+  - Class: rviz_default_plugins/Image
+    Name: Jackal 2 RGB + YOLO26
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /j100_0001/yolo26/annotated_image
+    Transport Hint: raw
+    Normalize Range: true
+    Min Value: 0
+    Max Value: 1
+    Median window: 5
+    Value: true
+  - Class: rviz_default_plugins/Image
+    Name: Task allocation
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /search/task_allocation/image
+    Transport Hint: raw
+    Normalize Range: true
+    Min Value: 0
+    Max Value: 1
+    Median window: 5
+    Value: true
+  - Class: rviz_default_plugins/MarkerArray
+    Name: Frontiers
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /search/frontiers/markers
+    Value: true
+  - Class: rviz_default_plugins/MarkerArray
+    Name: Task allocation routes
+    Enabled: true
+    Topic:
+      Depth: 1
+      Durability Policy: Transient Local
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /search/task_plan/markers
+    Value: true
+  - Class: rviz_default_plugins/Pose
+    Name: Husky pose
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /a200_0000/ground_truth/pose
+    Shape: Arrow
+    Color: 217; 84; 26
+    Shaft Length: 1.0
+    Shaft Radius: 0.12
+    Head Length: 0.35
+    Head Radius: 0.25
+    Alpha: 1
+    Value: true
+  - Class: rviz_default_plugins/Path
+    Name: Husky Nav2 plan
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /a200_0000/plan
+    Color: 217; 84; 26
+    Line Style: Lines
+    Line Width: 0.03
+    Alpha: 1
+    Value: true
+  - Class: rviz_default_plugins/Pose
+    Name: Jackal 1 pose
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /j100_0000/ground_truth/pose
+    Shape: Arrow
+    Color: 0; 114; 189
+    Shaft Length: 1.0
+    Shaft Radius: 0.12
+    Head Length: 0.35
+    Head Radius: 0.25
+    Alpha: 1
+    Value: true
+  - Class: rviz_default_plugins/Path
+    Name: Jackal 1 Nav2 plan
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /j100_0000/plan
+    Color: 0; 114; 189
+    Line Style: Lines
+    Line Width: 0.03
+    Alpha: 1
+    Value: true
+  - Class: rviz_default_plugins/Pose
+    Name: Jackal 2 pose
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Best Effort
+      Value: /j100_0001/ground_truth/pose
+    Shape: Arrow
+    Color: 119; 172; 48
+    Shaft Length: 1.0
+    Shaft Radius: 0.12
+    Head Length: 0.35
+    Head Radius: 0.25
+    Alpha: 1
+    Value: true
+  - Class: rviz_default_plugins/Path
+    Name: Jackal 2 Nav2 plan
+    Enabled: true
+    Topic:
+      Depth: 5
+      Durability Policy: Volatile
+      History Policy: Keep Last
+      Reliability Policy: Reliable
+      Value: /j100_0001/plan
+    Color: 119; 172; 48
+    Line Style: Lines
+    Line Width: 0.03
+    Alpha: 1
+    Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+  - Class: rviz_default_plugins/MoveCamera
+  - Class: rviz_default_plugins/Select
+  - Class: rviz_default_plugins/Measure
+  - Class: rviz_default_plugins/SetGoal
+    Topic:
+      Value: /a200_0000/goal_pose
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/TopDownOrtho
+      Name: Current View
+      X: 19.3
+      Y: -23.5
+      Scale: 18
+      Angle: 0
+      Target Frame: <Fixed Frame>
+      Value: TopDownOrtho
+Window Geometry:
+  Height: 1000
+  Width: 1500
+  Views:
+    collapsed: true

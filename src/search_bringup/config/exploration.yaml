@@ -1,0 +1,61 @@
+# Exploration stack parameters. Robot lists (namespaces, speeds, goal_max_cost)
+# are filled in from robots.yaml by exploration.launch.py. goal_max_cost is on
+# Nav2's 0..252 cost scale (robot's global costmap at the frontier goal).
+
+frontier_detector:
+  ros__parameters:
+    use_sim_time: true
+    period_s: 1.0
+    # WFD (Topiwala et al.): frontiers smaller than this are rejected.
+    min_frontier_size_cells: 20
+    # Never let the wavefront step through occupied cells.
+    block_occupied: true
+    seed_search_radius_cells: 40
+    # Choose the free neighbour nearest the centroid whose raw global cost is
+    # <= goal_max_cost for every robot. Keep blocked frontier geometry
+    # for mission completion; only admissible candidates get goal markers.
+    # 0 disables the minimum robot distance.
+    min_goal_distance_m: 0.0
+    goal_costmap_timeout_sec: 3.0
+    occupied_threshold: 65
+    id_match_distance_m: 0.75
+
+task_allocator:
+  ros__parameters:
+    use_sim_time: true
+    # Hungarian ownership on C_ij = D_ij. 0 = ceil(frontiers / available robots) slots per
+    # robot; 1 = one frontier per robot (PDF eqs. 4-6).
+    slots_per_robot: 0
+    # Re-allocation triggers (as in the old allocator) and failure handling.
+    periodic_reallocation_s: 5.0
+    frontier_count_change_threshold: 2
+    frontier_id_change_ratio: 0.2
+    assigned_match_distance_m: 0.75
+    goal_costmap_timeout_sec: 3.0
+
+exploration_dispatcher:
+  ros__parameters:
+    use_sim_time: true
+    # Ported from the field_robotics hotel_exploration_dispatcher.
+    goal_costmap_timeout_sec: 3.0
+    frontier_match_distance_m: 0.75
+    invalid_frontier_snapshots: 2
+    # Ask for a fresh allocation once a robot is this far (path distance, from
+    # Nav2 feedback) from the frontier it is driving to. The re-solve then runs
+    # while the robot is still moving, so its next target is ready on arrival and
+    # is chosen from frontiers discovered on the way in. Fires once per goal.
+    approach_reallocation_distance_m: 1.5
+    # A Nav2 failure excludes the whole robot from allocation and dispatch for
+    # this long in simulation seconds; the remaining robots inherit its work.
+    failure_timeout_s: 30.0
+    dispatch_rate_hz: 5.0
+    dispatch_enabled: true
+
+mission_coordinator:
+  ros__parameters:
+    use_sim_time: true
+    start_delay_s: 2.0
+    complete_after_s: 15.0
+    # Completion requires no WFD frontiers, a corresponding empty plan, and
+    # fresh idle status/poses/map. Ineligible or failed frontiers keep exploring.
+    observation_timeout_s: 3.0

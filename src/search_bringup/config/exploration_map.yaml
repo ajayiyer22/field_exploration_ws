@@ -1,0 +1,16 @@
+# exploration_map parameters. Robot sizes and the grid come from robots.yaml
+# and config/worlds/<world>.yaml via mapping.launch.py.
+exploration_map:
+  ros__parameters:
+    use_sim_time: true
+    scan_topic: sensors/lidar2d_0/scan
+    base_frame: base_link
+    lidar_frame_fallback: lidar2d_0_laser
+    map_frame: map
+    occupancy_topic: /exploration_map/occupancy
+    costmap_topic: exploration_costmap
+    max_range: 8.0
+    beam_stride: 1
+    scan_period: 0.2
+    publish_period: 0.5
+    clear_robot_footprints: true

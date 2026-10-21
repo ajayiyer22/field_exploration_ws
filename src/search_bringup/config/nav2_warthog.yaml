@@ -1,0 +1,254 @@
+# Nav2 for the Warthog W200 (same layout as nav2_diff_drive.yaml).
+# nav2.launch.py replaces robot, footprint, inflation radii and speed placeholders.
+#
+# The global costmap takes its cost from exploration_map's per-robot costmap
+# (/<robot>/exploration_costmap: 255 * exp(-d / S), scaled to 0..100) through a
+# non-trinary StaticLayer, so Smac plans on that cost; an inflation layer adds
+# only the robot's inscribed-radius band.
+# The local costmap combines shared-map walls, live lidar and a bounded
+# inflation gradient covering the padded footprint in every orientation.
+# MPPI uses the gradient and checks the full footprint near obstacles.
+# Frames are this robot's own (base_link, odom) on /<robot>/tf; map -> odom
+# comes from ground_truth_localizer.
+planner_server:
+  ros__parameters:
+    use_sim_time: true
+    expected_planner_frequency: 1.0
+    planner_plugins: [GridBased]
+    GridBased:
+      plugin: nav2_smac_planner::SmacPlanner2D
+      tolerance: 0.25
+      downsample_costmap: false
+      # A frontier goal borders unknown space; unknown cells cost 255, so paths
+      # still prefer known space.
+      allow_unknown: true
+      max_iterations: 1000000
+      max_on_approach_iterations: 1000
+      max_planning_time: 5.0
+      cost_travel_multiplier: 2.0
+      use_final_approach_orientation: false
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      use_sim_time: true
+      global_frame: map
+      robot_base_frame: base_link
+      transform_tolerance: 0.5
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      footprint: <footprint>
+      footprint_padding: 0.0
+      resolution: 0.05
+      track_unknown_space: true
+      always_send_full_costmap: true
+      plugins: [static_layer, obstacle_layer, inscribed_layer]
+      static_layer:
+        plugin: nav2_costmap_2d::StaticLayer
+        map_topic: /<robot>/exploration_costmap
+        map_subscribe_transient_local: true
+        subscribe_to_updates: false
+        trinary_costmap: false
+        lethal_cost_threshold: 100
+      # Gives Smac early visibility of lidar obstacles (e.g. the other robots,
+      # which the shared map leaves out), as in the field_robotics configuration.
+      obstacle_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        footprint_clearing_enabled: true
+        combination_method: 1
+        # Lidar height band, as in the field_robotics Hotel configuration: a
+        # layer-wide vertical acceptance band in the map frame, repeated per
+        # source, so the horizontal Hokuyo scan on its raised mount is kept.
+        min_obstacle_height: 0.05
+        max_obstacle_height: 2.0
+        observation_sources: scan
+        scan:
+          topic: /<robot>/sensors/lidar2d_0/scan
+          data_type: LaserScan
+          min_obstacle_height: 0.05
+          max_obstacle_height: 2.0
+          clearing: true
+          marking: true
+          obstacle_max_range: 5.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 5.5
+          raytrace_min_range: 0.0
+      # Smac 2D plans the robot centre as a point. This inflation layer only
+      # marks cells within the robot's inscribed radius (half its width) of an
+      # obstacle as non-traversable, so no gap narrower than the robot is
+      # planned through; the steep scaling leaves the size-based cost of
+      # static_layer as the only cost beyond that band.
+      inscribed_layer:
+        plugin: nav2_costmap_2d::InflationLayer
+        inflation_radius: <inscribed_radius>
+        cost_scaling_factor: 50.0
+        inflate_unknown: false
+
+controller_server:
+  ros__parameters:
+    use_sim_time: true
+    controller_frequency: 20.0
+    odom_topic: /<robot>/platform/odom/filtered
+    enable_stamped_cmd_vel: true
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.3
+    progress_checker_plugins: [progress_checker]
+    goal_checker_plugins: [goal_checker]
+    controller_plugins: [FollowPath]
+    progress_checker:
+      plugin: nav2_controller::SimpleProgressChecker
+      required_movement_radius: 0.15
+      # A half-turn at 15 degrees/s takes 12 s before translation starts.
+      movement_time_allowance: 30.0
+    goal_checker:
+      plugin: nav2_controller::SimpleGoalChecker
+      xy_goal_tolerance: 0.20
+      # Exploration goals only need position: the 2D lidar sees 360 degrees,
+      # and turning in place at 15 deg/s would add ~10-20 s per goal.
+      yaw_goal_tolerance: 3.14
+      stateful: true
+    FollowPath:
+      # Align to a new path before MPPI tracks it; the slow forward-only
+      # controller otherwise stalls when a frontier lies behind it.
+      plugin: nav2_rotation_shim_controller::RotationShimController
+      primary_controller: nav2_mppi_controller::MPPIController
+      angular_dist_threshold: 0.785
+      angular_disengage_threshold: 0.35
+      forward_sampling_distance: 0.5
+      rotate_to_heading_angular_vel: <wz_max>
+      max_angular_accel: 1.5
+      simulate_ahead_time: 2.0
+      time_steps: 40
+      model_dt: 0.05
+      batch_size: 1000
+      iteration_count: 1
+      vx_std: 0.8
+      vy_std: 0.0
+      wz_std: 0.10
+      vx_max: <vx_max>
+      # Allow reversing out of pockets; PreferForwardCritic keeps forward motion preferred.
+      vx_min: -0.35
+      vy_max: 0.0
+      wz_max: <wz_max>
+      ax_max: 3.0
+      ax_min: -3.0
+      ay_max: 0.0
+      az_max: 1.5
+      prune_distance: 1.5
+      transform_tolerance: 0.3
+      temperature: 0.3
+      gamma: 0.015
+      motion_model: DiffDrive
+      visualize: true
+      trajectory_step: 10
+      time_step: 3
+      regenerate_noises: false
+      critics: [ConstraintCritic, CostCritic, GoalCritic, GoalAngleCritic,
+        PathAlignCritic, PathFollowCritic, PathAngleCritic, PreferForwardCritic]
+      CostCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.81
+        critical_cost: 300.0
+        # Inflation identifies nearby obstacles; also check the full footprint.
+        consider_footprint: true
+        inflation_layer_name: inflation_layer
+        collision_cost: 1000000.0
+        near_goal_distance: 1.0
+        trajectory_point_step: 2
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      use_sim_time: true
+      global_frame: odom
+      robot_base_frame: base_link
+      transform_tolerance: 0.5
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      rolling_window: true
+      width: 14
+      height: 14
+      resolution: 0.05
+      footprint: <footprint>
+      # Keep a small margin so the robot does not end up touching walls.
+      # The controller keeps a 5 cm margin from obstacles.
+      footprint_padding: 0.05
+      track_unknown_space: false
+      always_send_full_costmap: true
+      plugins: [static_layer, obstacle_layer, inflation_layer]
+      static_layer:
+        plugin: nav2_costmap_2d::StaticLayer
+        map_topic: /exploration_map/occupancy
+        map_subscribe_transient_local: true
+        subscribe_to_updates: false
+        trinary_costmap: true
+        lethal_cost_threshold: 65
+      obstacle_layer:
+        plugin: nav2_costmap_2d::ObstacleLayer
+        enabled: true
+        footprint_clearing_enabled: true
+        combination_method: 1
+        # Lidar height band, as in the field_robotics Hotel configuration: a
+        # layer-wide vertical acceptance band in the map frame, repeated per
+        # source, so the horizontal Hokuyo scan on its raised mount is kept.
+        min_obstacle_height: 0.05
+        max_obstacle_height: 2.0
+        observation_sources: scan
+        scan:
+          topic: /<robot>/sensors/lidar2d_0/scan
+          data_type: LaserScan
+          min_obstacle_height: 0.05
+          max_obstacle_height: 2.0
+          clearing: true
+          marking: true
+          obstacle_max_range: 5.0
+          obstacle_min_range: 0.0
+          raytrace_max_range: 5.5
+          raytrace_min_range: 0.0
+
+      inflation_layer:
+        plugin: nav2_costmap_2d::InflationLayer
+        enabled: true
+        # Padded half-diagonal + 0.10 m, rounded up to the 5 cm grid.
+        inflation_radius: <local_inflation_radius>
+        cost_scaling_factor: 3.0
+        inflate_unknown: false
+
+behavior_server:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: odom
+    robot_base_frame: base_link
+    transform_tolerance: 0.5
+    enable_stamped_cmd_vel: true
+    local_costmap_topic: local_costmap/costmap_raw
+    local_footprint_topic: local_costmap/published_footprint
+    global_costmap_topic: global_costmap/costmap_raw
+    global_footprint_topic: global_costmap/published_footprint
+    cycle_frequency: 10.0
+    simulate_ahead_time: 2.0
+    max_rotational_vel: <wz_max>
+    min_rotational_vel: 0.10
+    rotational_acc_lim: 1.5
+    behavior_plugins: [backup, wait]
+    backup:
+      plugin: nav2_behaviors::BackUp
+    wait:
+      plugin: nav2_behaviors::Wait
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: true
+    global_frame: map
+    robot_base_frame: base_link
+    odom_topic: /<robot>/platform/odom/filtered
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    wait_for_service_timeout: 1000
+    navigators: [navigate_to_pose]
+    navigate_to_pose:
+      plugin: nav2_bt_navigator::NavigateToPoseNavigator

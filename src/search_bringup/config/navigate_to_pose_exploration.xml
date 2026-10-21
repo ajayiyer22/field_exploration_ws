@@ -1,0 +1,42 @@
+<!-- Exploration navigation with bounded recovery.
+
+     The stock Nav2 tree commands a +1.57 rad spin after repeated planning
+     failures. All robots have broad LiDAR coverage and the navigation manager
+     reallocates failed frontiers, so rotating blindly does not help. Each
+     recovery clears the costmaps, backs up 0.3 m when there is room (a robot
+     wedged against a wall has an occupied start and cannot plan until it
+     moves), and briefly waits; after two retries the goal fails and the
+     frontier is reallocated. -->
+<root BTCPP_format="4" main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <RecoveryNode number_of_retries="2" name="NavigateRecovery">
+      <PipelineSequence name="NavigateWithReplanning">
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="ComputePathToPose">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="GridBased"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Context"
+              service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPath">
+          <FollowPath path="{path}" controller_id="FollowPath"/>
+          <ClearEntireCostmap name="ClearLocalCostmap-Context"
+            service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+      <ReactiveFallback name="RecoveryFallback">
+        <GoalUpdated/>
+        <Sequence name="RecoveryActions">
+          <ClearEntireCostmap name="ClearLocalCostmap-Subtree"
+            service_name="local_costmap/clear_entirely_local_costmap"/>
+          <ClearEntireCostmap name="ClearGlobalCostmap-Subtree"
+            service_name="global_costmap/clear_entirely_global_costmap"/>
+          <ForceSuccess>
+            <BackUp backup_dist="0.3" backup_speed="0.1"/>
+          </ForceSuccess>
+          <Wait wait_duration="1"/>
+        </Sequence>
+      </ReactiveFallback>
+    </RecoveryNode>
+  </BehaviorTree>
+</root>

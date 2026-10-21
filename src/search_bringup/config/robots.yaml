@@ -1,0 +1,38 @@
+# The exploration team. Spawn poses live in config/worlds/<world>.yaml.
+#
+#   length, width   outer footprint (m), Clearpath spec; S = length * width sets
+#                   the costmap decay rate 1/S in exploration_map
+#   v_max, w_max    speed limits, used by Nav2 MPPI
+#   goal_max_cost   frontier goal accepted for this robot only if its Nav2 global
+#                   costmap cost there is at most this value (0..252); cells within
+#                   the robot's inscribed radius of a wall (253) are always rejected
+#                   29 means strictly below 30 on the raw Nav2 0..255 scale
+#   nav2_params     Nav2 template in config/
+robots:
+  - namespace: a200_0000
+    platform: husky_a200
+    goal_label_prefix: H
+    length: 0.99
+    width: 0.67
+    v_max: 3.0
+    w_max: 0.2617993878
+    goal_max_cost: 29.0
+    nav2_params: nav2_diff_drive.yaml
+  - namespace: j100_0000
+    platform: jackal_j100
+    goal_label_prefix: J1
+    length: 0.51
+    width: 0.43
+    v_max: 3.0
+    w_max: 0.2617993878
+    goal_max_cost: 29.0
+    nav2_params: nav2_diff_drive.yaml
+  - namespace: j100_0001
+    platform: jackal_j100
+    goal_label_prefix: J2
+    length: 0.51
+    width: 0.43
+    v_max: 3.0
+    w_max: 0.2617993878
+    goal_max_cost: 29.0
+    nav2_params: nav2_diff_drive.yaml

@@ -1,0 +1,18 @@
+yolo26_detector:
+  ros__parameters:
+    use_sim_time: true
+    # PyTorch CUDA device 0: this machine's NVIDIA GeForce RTX 5060 Ti.
+    device: 0
+    half_precision: true
+    target_class: red tennis ball
+    confidence_threshold: 0.25
+    image_size: 640
+    # Aggregate wall-clock rate, shared fairly by all cameras. Only latest frames are kept.
+    processing_rate_hz: 30.0
+    required_consecutive_hits: 3
+    # YOLO sports-ball detections must pass the red HSV color check.
+    red_fraction_threshold: 0.50
+    # Retain the optional pink qualifier for explicitly selected legacy targets.
+    pink_fraction_threshold: 0.08
+    max_image_age_s: 2.0
+    max_hit_gap_s: 3.0

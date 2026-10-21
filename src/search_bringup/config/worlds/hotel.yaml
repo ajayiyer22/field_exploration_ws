@@ -1,0 +1,31 @@
+# rmf_demos Hotel, level L1.
+rmf_map_name: hotel
+gazebo_world_name: sim_world
+
+# Shared exploration grid (exploration_map). Covers the L1 floor plate.
+grid:
+  origin_x: 0.0
+  origin_y: -47.05
+  size_x_m: 38.6
+  size_y_m: 47.05
+  resolution: 0.05
+
+# RMF door plugins keep doors closed unless requested otherwise.
+# L1_door3 is the exterior sliding entrance at the lobby's south edge.
+doors:
+  open: [L1_door1, L1_door2, L1_door4, L1_door5]
+  closed: [L1_door3]
+
+# Spawn poses, keyed by robot namespace.
+spawn:
+  a200_0000: {x: 11.09, y: -25.98, z: 0.3, yaw: 0.0}
+  j100_0000: {x: 20.73, y: -32.90, z: 0.3, yaw: 0.0}
+  j100_0001: {x: 12.5, y: -30.98, z: 0.3, yaw: 0.0}
+
+# Fixed camera-visible target in the north-west corner of the L1 store room.
+# Floor z=0; the sphere centre is one radius above it.
+targets:
+  - name: red_tennis_ball_target
+    position: [24.97, -26.48, 0.0335]
+    radius: 0.0335
+    color: [1.0, 0.0, 0.0, 1.0]

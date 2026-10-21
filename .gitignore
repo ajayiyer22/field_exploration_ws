@@ -1,0 +1,14 @@
+build/
+install/
+log/
+results/
+__pycache__/
+*.pyc
+output/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.env
+.env.*
+!.env.example
